@@ -20,6 +20,6 @@ const bookmarks = [
       rating: '4',
       desc: 'brings together the world\'s largest community of developers.'
     }
-];
+]
 
 module.exports = {bookmarks}

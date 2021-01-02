@@ -6,18 +6,15 @@ const helmet = require('helmet')
 const {NODE_ENV} = require('./config')
 const winston = require('winston')
 const bookmarksRouter = require('./bookmarks/bookmarks-router')
+const logger = require('./logger')
 
 const app = express()
-
-
 
 const morganOption = (NODE_ENV === 'production') ? 'tiny' : 'common'
 
 app.use(morgan(morganOption))
 app.use(helmet())
 app.use(cors())
-
-
 
 app.use(function validateBearerToken(req, res, next) {
     const apiToken = process.env.API_TOKEN
@@ -30,6 +27,7 @@ app.use(function validateBearerToken(req, res, next) {
 })
 
 app.use(bookmarksRouter)
+
 app.get('/', (req, res) => {
     res.send('Hello, world!')
 })
@@ -41,6 +39,7 @@ app.use(function errorHandler(error, req, res, next) {
         response={error: {message: 'server error'}}
     } else {
         console.error(error)
+        logger.error(error.message)
         response = {message: error.message, error}
     }
     res.status(500).json(response)

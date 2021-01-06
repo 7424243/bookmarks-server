@@ -1,3 +1,4 @@
+require('dotenv').config()
 process.env.NODE_ENV = 'test'
 const mocha = require('mocha')
 const expect = require('chai').expect

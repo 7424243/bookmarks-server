@@ -8,8 +8,6 @@ const BookmarksService = require('./bookmarks-service')
 const bookmarksRouter = express.Router()
 const bodyParser = express.json()
 
-
-
 bookmarksRouter
     .route('/bookmarks')
     .get((req, res, next) => {
@@ -64,7 +62,7 @@ bookmarksRouter
             .then(bookmark => {
                 if(!bookmark) {
                     logger.error(`Bookmark with id ${id} not found.`)
-                    return res.status(400).send('Bookmark Not Found')
+                    return res.status(404).send('bookmark not found')
                 }
                 res.json(bookmark)
             })

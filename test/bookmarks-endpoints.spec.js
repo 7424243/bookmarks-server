@@ -22,6 +22,15 @@ describe.only('Bookmarks Endpoints', function() {
     afterEach('cleanup', () => db('bookmarks').truncate())
 
     describe(`Get /bookmarks`, () => {
+        context('Given no bookmarks', () => {
+            it(`responds with 200 and an empty list`, () => {
+                return supertest(app)
+                    .get('/bookmarks')
+                    .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
+                    .expect(200, [])
+            })
+
+        })
         context(`Given there are bookmarks in the database`, () => {
             const testBookmarks = makeBookmarksArray()
             beforeEach('insert bookmarks', () => {
@@ -38,6 +47,17 @@ describe.only('Bookmarks Endpoints', function() {
         })
     })
     describe(`GET /bookmarks/:id`, () => {
+        context(`Given no bookmarks`, () => {
+            it(`responds 404 when bookmark doesn't exist`, () => {
+                const bookmarkId = 123456
+              return supertest(app)
+                .get(`/bookmarks/${bookmarkId}`)
+                .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
+                .expect(404, {
+                  error: { message: `Bookmark Not Found` }
+                })
+            })
+        })
         context('Given there are bookmarks in the database', () => {
             const testBookmarks = makeBookmarksArray()
             beforeEach('insert articles', () => {

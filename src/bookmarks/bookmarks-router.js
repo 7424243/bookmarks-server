@@ -4,9 +4,17 @@ const logger = require('../logger')
 const {bookmarks} = require('../store')
 const BookmarksService = require('./bookmarks-service')
 const {isWebUri} = require('valid-url')
+const xss = require('xss')
 
 const bookmarksRouter = express.Router()
 const bodyParser = express.json()
+
+const serializeBookmark = bookmark => ({
+    id: bookmark.id,
+    title: xss(bookmark.title),
+    rating: bookmark.rating,
+    description: xss(bookmark.description)
+})
 
 bookmarksRouter
     .route('/bookmarks')
@@ -60,7 +68,7 @@ bookmarksRouter
                 res
                     .status(201)
                     .location(`/bookmarks/${bookmark.id}`)
-                    .json(bookmark)
+                    .json(serializeBookmark(bookmark))
             })
             .catch(next)
     })

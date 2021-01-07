@@ -64,7 +64,7 @@ describe('Bookmarks Endpoints', function() {
             })
         })
     })
-    describe.only(`GET /bookmarks/:id`, () => {
+    describe(`GET /bookmarks/:id`, () => {
         context(`Given no bookmarks`, () => {
             it(`responds 404 when bookmark doesn't exist`, () => {
                 const bookmarkId = 123456
@@ -111,33 +111,33 @@ describe('Bookmarks Endpoints', function() {
             })
         })
     })
-    describe(`POST /bookmarks`, () => {
-        it(`creates a new bookmark, responding with 201 and the new bookmark`, () => {
+    describe.only(`POST /bookmarks`, () => {
+        it('adds a new bookmark to the database', () => {
             const newBookmark = {
-                title: 'Test new bookmark title',
-                url: 'Test new bookmark url',
-                rating: 4,
-                description: 'Test new bookmark description'
+              title: 'test-title',
+              url: 'https://test.com',
+              rating: 4,
+              description: 'test description',
+              
             }
             return supertest(app)
-                .post('/bookmarks')
+                .post(`/bookmarks`)
                 .send(newBookmark)
                 .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
-                .send(newBookmark)
                 .expect(201)
                 .expect(res => {
-                    expect(res.body.title).to.eql(newBookmark.title),
+                    expect(res.body.title).to.eql(newBookmark.title)
                     expect(res.body.url).to.eql(newBookmark.url)
-                    expect(res.body.rating).to.eql(newBookmark.rating)
                     expect(res.body.description).to.eql(newBookmark.description)
+                    expect(res.body.rating).to.eql(newBookmark.rating)
                     expect(res.body).to.have.property('id')
                     expect(res.headers.location).to.eql(`/bookmarks/${res.body.id}`)
                 })
-                .then(postRes => 
+                .then(res =>
                     supertest(app)
-                        .get(`bookmarks/${postRes.body.id}`)
-                        .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
-                        .expect(postRes.body)
+                    .get(`/bookmarks/${res.body.id}`)
+                    .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
+                    .expect(res.body)
                 )
         })
         it(`responds with 400 and an error message when the 'title' is missing`, () => {

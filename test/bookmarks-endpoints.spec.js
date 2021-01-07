@@ -21,6 +21,48 @@ describe('Bookmarks Endpoints', function() {
 
     afterEach('cleanup', () => db('bookmarks').truncate())
 
+    describe(`Unauthorized requests`, () => {
+        const bookmarks = makeBookmarksArray()
+
+        beforeEach('insert bookmarks', () => {
+            return db
+              .into('bookmarks')
+              .insert(bookmarks)
+        })
+
+        it(`responds with 401 Unauthorized for GET /bookmarks`, () => {
+            return supertest(app)
+              .get('/bookmarks')
+              .expect(401, { error: 'Unauthorized request' })
+          })
+    
+          it(`responds with 401 Unauthorized for GET /bookmarks/:id`, () => {
+            const secondBookmark = bookmarks[1]
+            return supertest(app)
+              .get(`/bookmarks/${secondBookmark.id}`)
+              .expect(401, { error: 'Unauthorized request' })
+          })
+
+          it(`responds with 401 Unauthorized for POST /bookmarks`, () => {
+            return supertest(app)
+                .post('/bookmarks')
+                .send({
+                    title: 'Test title',
+                    url: 'http://test.com',
+                    rating: 2
+                })
+                .expect(401, {error: 'Unauthorized request'})
+          })
+
+          it(`responds with 401 Unauthorized for DELETE /bookmarks/:id`, () => {
+              const deleteBookmark = bookmarks[0]
+              return supertest(app)
+                .get(`/bookmarks/${deleteBookmark.id}`)
+                .expect(401, {error: 'Unauthorized request'})
+          })
+    })
+
+
     describe(`Get /bookmarks`, () => {
         context('Given no bookmarks', () => {
             it(`responds with 200 and an empty list`, () => {
@@ -111,7 +153,7 @@ describe('Bookmarks Endpoints', function() {
             })
         })
     })
-    describe.only(`POST /bookmarks`, () => {
+    describe(`POST /bookmarks`, () => {
         it('adds a new bookmark to the database', () => {
             const newBookmark = {
               title: 'test-title',

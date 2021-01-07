@@ -12,7 +12,8 @@ const bodyParser = express.json()
 const serializeBookmark = bookmark => ({
     id: bookmark.id,
     title: xss(bookmark.title),
-    rating: bookmark.rating,
+    url: bookmark.url,
+    rating: Number(bookmark.rating),
     description: xss(bookmark.description)
 })
 
@@ -22,7 +23,7 @@ bookmarksRouter
         const knexInstance = req.app.get('db')
         BookmarksService.getAllBookmarks(knexInstance)
             .then(bookmarks => {
-                res.json(serializeBookmark(bookmarks))
+                res.json(bookmarks.map(serializeBookmark))
             })
             .catch(next)
     })

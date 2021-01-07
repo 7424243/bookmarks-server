@@ -153,5 +153,18 @@ describe('Bookmarks Endpoints', function() {
                     error: {message: `'Rating' must be between 0 and 5`}
                 })
         })
+        it(`responds with 400 and an error message when the 'url' is not valid`, () => {
+            return supertest(app)
+                .post('/bookmarks')
+                .send({
+                    title: 'Test title',
+                    url: 'htp://invalid url',
+                    rating: 1,
+                })
+                .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
+                .expect(400, {
+                    error: {message: `'url' must be a valid URL`}
+                })
+        })
     })
 })

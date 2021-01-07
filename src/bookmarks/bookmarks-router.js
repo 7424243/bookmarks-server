@@ -3,6 +3,7 @@ const express = require('express')
 const logger = require('../logger')
 const {bookmarks} = require('../store')
 const BookmarksService = require('./bookmarks-service')
+const {isWebUri} = require('valid-url')
 
 const bookmarksRouter = express.Router()
 const bodyParser = express.json()
@@ -26,6 +27,7 @@ bookmarksRouter
         // return res.status(400).json({
         //     error: {message: `Missing '${key}' in request body`}
         // })
+
         for (const field of ['title', 'url', 'rating']) {
             if (!req.body[field]) {
               logger.error(`${field} is required`)
@@ -35,10 +37,18 @@ bookmarksRouter
             }
           }
 
-        if(rating < 0 || rating > 5) {
+        const ratingNumber = Number(rating)
+
+        if(!Number.isInteger(ratingNumber) || rating < 0 || rating > 5) {
             logger.error(`Invalid rating.`)
             return res.status(400).json({
                 error: {message: `'Rating' must be between 0 and 5`}
+            })
+        }
+
+        if(!isWebUri(url)) {
+            return res.status(400).json({
+                error: {message: `'url' must be a valid URL`}
             })
         }
 

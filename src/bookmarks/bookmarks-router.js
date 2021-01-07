@@ -1,6 +1,5 @@
-require('dotenv').config()
+
 const express = require('express')
-const {v4: uuid} = require('uuid')
 const logger = require('../logger')
 const {bookmarks} = require('../store')
 const BookmarksService = require('./bookmarks-service')
@@ -18,40 +17,42 @@ bookmarksRouter
             })
             .catch(next)
     })
-    .post(bodyParser, (req, res) => {
-        const {title, url, rating, desc} = req.body
-        if(!title) {
-            logger.error(`Title is required`)
-            return res.status(400).send('Invalid data')
-        }
-        if(!url) {
-            logger.error(`Url is required`)
-            return res.status(400).send('Invalid data')
-        }
-        if(!rating) {
-            logger.error(`Rating is required`)
-            return res.status(400).send('Invalid data')
-        }
-        if(!desc) {
-            logger.error(`Description is required`)
-            return res.status(400).send('Invalid data')
-         }
+    .post(bodyParser, (req, res, next) => {
+        const {title, url, rating, description} = req.body
+        const newBookmark = {title, url, rating, description}
+
+        // for(const [key,value] of Object.entries(newBookmark))
+        // if(value == null)
+        // return res.status(400).json({
+        //     error: {message: `Missing '${key}' in request body`}
+        // })
+        for (const field of ['title', 'url', 'rating']) {
+            if (!req.body[field]) {
+              logger.error(`${field} is required`)
+              return res.status(400).send({
+                error: { message: `Missing '${field}' in request body` }
+              })
+            }
+          }
+
         if(rating < 0 || rating > 5) {
             logger.error(`Invalid rating.`)
-            return res.status(400).send(`Rating must be a number between 0 and 5`)
+            return res.status(400).json({
+                error: {message: `'Rating' must be between 0 and 5`}
+            })
         }
-    
-        const id = uuid()
-        const bookmark = {
-            id,
-            title,
-            url,
-            rating,
-            desc
-        }
-        bookmarks.push(bookmark)
-        logger.info(`Bookmark with id ${id} created`)
-        res.status(201).location(`http://localhost:8000/bookmarks/${id}`).json(bookmark)
+
+        BookmarksService.insertBookmark(
+            req.app.get('db'),
+            newBookmark
+        )
+            .then(bookmark => {
+                res
+                    .status(201)
+                    .location(`/bookmarks/${bookmark.id}`)
+                    .json(bookmark)
+            })
+            .catch(next)
     })
 
 bookmarksRouter

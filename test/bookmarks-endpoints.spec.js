@@ -258,4 +258,38 @@ describe('Bookmarks Endpoints', function() {
 
         })
     })
+
+    describe(`DELETE /bookmarks/:id`, () => {
+        context(`Given there are no bookmarks in the database`, () => {
+            it(`responds with 404`, () => {
+                const bookmarkId = 123456
+                return supertest(app)
+                    .delete(`/bookmarks/${bookmarkId}`)
+                    .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
+                    .expect(404, {error: {message: `Bookmark Not Found`}})
+            })
+        })
+        context(`Given there are bookmarks in the database`, () => {
+            const testBookmarks = makeBookmarksArray()
+            beforeEach(`insert bookmarks`, () => {
+                return db
+                    .into('bookmarks')
+                    .insert(testBookmarks)
+            })
+            it(`responds with 204 and removes the bookmark`, () => {
+                const idToRemove = 2
+                const expectedBookmarks = testBookmarks.filter(bookmark => bookmark.id !== idToRemove)
+                return supertest(app)
+                    .delete(`/bookmarks/${idToRemove}`)
+                    .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
+                    .expect(204)
+                    .then(() => 
+                        supertest(app)
+                            .get(`/bookmarks`)
+                            .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
+                            .expect(expectedBookmarks)
+                    )
+            })
+        })
+    })
 })

@@ -6,6 +6,7 @@ const BookmarksService = require('./bookmarks-service')
 const {isWebUri} = require('valid-url')
 const xss = require('xss')
 const path = require('path')
+const {getBookmarkValidationError} = require('./bookmark-validator')
 
 const bookmarksRouter = express.Router()
 const bodyParser = express.json()
@@ -113,12 +114,16 @@ bookmarksRouter
         const bookmarkToUpdate = {title, url, rating, description}
         const numberOfValues = Object.values(bookmarkToUpdate).filter(Boolean).length
         if(numberOfValues === 0) {
+            logger.error(`Invalid update without required fields`)
             return res.status(400).json({
                 error: {
                     message: `Request body must contain either 'title', 'url', or 'rating'`
                 }
             })
         }
+
+        const error = getBookmarkValidationError(bookmarkToUpdate)
+        if(error) return res.status(400).send(error)
         
         BookmarksService.updateBookmark(
             req.app.get('db'),

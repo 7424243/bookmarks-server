@@ -292,7 +292,7 @@ describe('Bookmarks Endpoints', function() {
             })
         })
     })
-    describe(`PATCH /api/bookmarks/:id`, () => {
+    describe.only(`PATCH /api/bookmarks/:id`, () => {
         context(`Given no bookmarks`, () => {
             it(`responds with 404`, () => {
                 const articleId = 123456
@@ -367,6 +367,36 @@ describe('Bookmarks Endpoints', function() {
                             .get(`/api/bookmarks/${idToUpdate}`)
                             .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
                             .expect(expectedBookmark)
+                    })
+            })
+            it(`responds with 400 invalid 'rating' if not between 0 and 5`, () => {
+                const idToUpdate = 2
+                const updateInvalidRating = {
+                    rating: 'invalid'
+                }
+                return supertest(app)
+                    .patch(`/api/bookmarks/${idToUpdate}`)
+                    .send(updateInvalidRating)
+                    .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
+                    .expect(400, {
+                        error: {
+                            message: `'rating' must be a number between 0 and 5`
+                        }
+                    })
+            })
+            it(`responds with 400 invalid 'url' if not a valid URL`, () => {
+                const idToUpdate = 2
+                const updateInvalidUrl = {
+                    url: 'htp://notvalid',
+                }
+                return supertest(app)
+                    .patch(`/api/bookmarks/${idToUpdate}`)
+                    .send(updateInvalidUrl)
+                    .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
+                    .expect(400, {
+                        error: {
+                            message: `'url' must be a valid URL`
+                        }
                     })
             })
         })

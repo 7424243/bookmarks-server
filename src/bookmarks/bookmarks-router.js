@@ -5,6 +5,7 @@ const {bookmarks} = require('../store')
 const BookmarksService = require('./bookmarks-service')
 const {isWebUri} = require('valid-url')
 const xss = require('xss')
+const path = require('path')
 
 const bookmarksRouter = express.Router()
 const bodyParser = express.json()
@@ -18,7 +19,7 @@ const serializeBookmark = bookmark => ({
 })
 
 bookmarksRouter
-    .route('/bookmarks')
+    .route('/')
     .get((req, res, next) => {
         const knexInstance = req.app.get('db')
         BookmarksService.getAllBookmarks(knexInstance)
@@ -68,14 +69,14 @@ bookmarksRouter
             .then(bookmark => {
                 res
                     .status(201)
-                    .location(`/bookmarks/${bookmark.id}`)
+                    .location(path.posix.join(req.originalUrl, `/${bookmark.id}`))
                     .json(serializeBookmark(bookmark))
             })
             .catch(next)
     })
 
 bookmarksRouter
-    .route('/bookmarks/:id')
+    .route('/:id')
     .all((req, res, next) => {
         const {id} = req.params
         const knexInstance = req.app.get('db')

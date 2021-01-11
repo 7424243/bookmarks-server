@@ -1,6 +1,6 @@
 # bookmarks-app-server!
 
-This was a Thinkful assignment to practice building an Express server.
+This was a Thinkful assignment to practice building an Express server. It is the server for [!bookmarks-app](https://github.com/7424243/bookmarks-app)
 
 ## Scripts
 
